@@ -258,7 +258,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_Sprite: {fileID: 4723107735738678597, guid: 0bd97e23f8b532a4f8969605a3b00a4e, type: 3}
   m_Color: {r: 0.8018868, g: 0.19290671, b: 0.19290671, a: 1}
-  m_FlipX: 1
+  m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 2, y: 2}
@@ -326,6 +326,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 956638017464bde40a36b06336932870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healtPref: {fileID: 8624040485220101150, guid: 6fdadb675f07f174fa87227755510842, type: 3}
+  shieldPref: {fileID: 4421665691278543018, guid: 97ec3db28a308114d91f4ec7a4221adc, type: 3}
+  attackBuffPref: {fileID: 8826490806136306357, guid: 70e36406c5cd398428115a8a67102324, type: 3}
+  speedBuffPref: {fileID: 3506708520516848915, guid: e2f4a0f48d81e0c42b58a420400f005b, type: 3}
   healt: 100
   healthBar: {fileID: 5550279351186365490}
 --- !u!95 &5550279350581934593
@@ -362,7 +366,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementSpeed: 2
-  attackDistance: 0.6
+  attackDistance: 0.8
   approachDistance: 3
   attackCooldown: 3
 --- !u!1 &5550279351186365488
