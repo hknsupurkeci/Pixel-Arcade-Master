@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TMPro;
+using UnityEngine.UIElements;
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
 
     [SerializeField] float      m_speed = 3.0f;
     [SerializeField] float      m_jumpForce = 7.5f;
@@ -70,20 +72,30 @@ public class PlayerController : MonoBehaviour {
         m_groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_HeroKnight>();
     }
 
+    public DynamicJoystick joystick;
+    private void Move(float inputX)
+    {
+        m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
+    }
+    public Button buttonBlink;
     // Update is called once per frame
-    void Update ()
+    void Update()
     {
         if (!GetHit.isDeath)
         {
             // Increase timer that controls attack combo
             m_timeSinceAttack += Time.deltaTime;
 
+            var pos = transform.position;
+            pos.x = Mathf.Clamp(transform.position.x, -20.0f, 20.0f);
+            transform.position = pos;
             //Jump controller
             JumpAndFallController();
 
-            // -- Handle input and movement --
-            float inputX = Input.GetAxis("Horizontal");
-
+            //// -- Handle input and movement --
+            //float inputX = Input.GetAxis("Horizontal");
+            float inputX = joystick.Horizontal;
+            Move(inputX);
             //Swap direction of sprite depending on walk direction
             if (inputX > 0)
             {
@@ -98,33 +110,34 @@ public class PlayerController : MonoBehaviour {
             }
 
             // Move
-            m_body2d.velocity = new Vector2(inputX * (isSpeedBuff ? SpeedBuffSpeed:m_speed), m_body2d.velocity.y); //Speed buff aktifse
+            m_body2d.velocity = new Vector2(inputX * (isSpeedBuff ? SpeedBuffSpeed : m_speed), m_body2d.velocity.y); //Speed buff aktifse
 
             //Set AirSpeed in animator
             m_animator.SetFloat("AirSpeedY", m_body2d.velocity.y);
 
             //Attack
-            if (Input.GetMouseButtonDown(0) && m_timeSinceAttack > 0.25f)
-            {
-                AttackAnim();
-            }
+            //if (Input.GetMouseButtonDown(0) && m_timeSinceAttack > 0.25f)
+            //{
+            //    AttackAnim();
+            //}
 
-            // Blink
-            else if (Input.GetMouseButtonDown(1) && !rightClickFlag)
-            {
-                rightClickFlag = true;
-            }
-            if (Input.GetMouseButtonUp(1))
-            {
-                RightClickUp();
-            }
+            //// Blink
+            //if (Input.GetMouseButtonDown(1) && !rightClickFlag)
+            //{
+            //    rightClickFlag = true;
+            //}
+            //if (Input.GetMouseButtonUp(1))
+            //{
+            //    RightClickUp();
+            //}
             //Blink özellikleri
             BlinkProperties();
             //Jump
-            if (Input.GetKeyDown("space") && m_grounded)
-                Jump();
+            //if (Input.GetKeyDown("space") && m_grounded)
+            //    Jump();
+
             //Run
-            else if (Mathf.Abs(inputX) > Mathf.Epsilon)
+            /*else*/ if (Mathf.Abs(inputX) > Mathf.Epsilon)
                 Run();
             //Idle
             else
@@ -137,7 +150,7 @@ public class PlayerController : MonoBehaviour {
             {
                 //7 saniye sonra kalkanı kaldırıyoruz
                 shieldTimer += Time.deltaTime;
-                if(shieldTimer > ActiveShieldTime)
+                if (shieldTimer > ActiveShieldTime)
                 {
                     shieldParticalObj.SetActive(false);
                     isShield = false;
@@ -168,7 +181,27 @@ public class PlayerController : MonoBehaviour {
             }
         }
     }
+    public void ButtonDown()
+    {
+        if (!GetHit.isDeath)
+        {
+            if (!rightClickFlag)
+            {
+                rightClickFlag = true;
+            }
 
+            Debug.Log("Button Down!" + "-" + rightClickFlag);
+        }
+    }
+
+    public void ButtonUp()
+    {
+        if (!GetHit.isDeath)
+        {
+            RightClickUp();
+            Debug.Log("Button Up!" + "-" + rightClickFlag);
+        }
+    }
     void JumpAndFallController()
     {
         //Check if character just landed on the ground
@@ -239,13 +272,19 @@ public class PlayerController : MonoBehaviour {
         m_delayToIdle = 0.05f;
         m_animator.SetInteger("AnimState", 1);
     }
-    void Jump()
+    public void Jump()
     {
-        m_animator.SetTrigger("Jump");
-        m_grounded = false;
-        m_animator.SetBool("Grounded", m_grounded);
-        m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
-        m_groundSensor.Disable(0.2f);
+        if (!GetHit.isDeath)
+        {
+            if (m_grounded)
+            {
+                m_animator.SetTrigger("Jump");
+                m_grounded = false;
+                m_animator.SetBool("Grounded", m_grounded);
+                m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
+                m_groundSensor.Disable(0.2f);
+            }
+        }
     }
 
     private void Attack()
@@ -261,7 +300,7 @@ public class PlayerController : MonoBehaviour {
 
         foreach (RaycastHit2D hit in hits)
         {
-            if (hit.collider != null && hit.collider.CompareTag("Enemy"))
+            if (hit.collider != null && hit.collider.tag.Contains("Enemy"))
             {
                 //kamera sallama efekti
                 CameraFollow cameraShake = cameraObject.GetComponent<CameraFollow>();
@@ -279,23 +318,29 @@ public class PlayerController : MonoBehaviour {
         }
         damage = 20;
     }
-    private void AttackAnim()
+    public void AttackAnim()
     {
-        m_currentAttack++;
+        if (!GetHit.isDeath)
+        {
+            if (m_timeSinceAttack > 0.25f)
+            {
+                m_currentAttack++;
 
-        // Loop back to one after third attack
-        if (m_currentAttack > 2)
-            m_currentAttack = 1;
+                // Loop back to one after third attack
+                if (m_currentAttack > 2)
+                    m_currentAttack = 1;
 
-        // Reset Attack combo if time since last attack is too large
-        if (m_timeSinceAttack > 1.0f)
-            m_currentAttack = 1;
-        Invoke("Attack", 0.3f);
-        // Call one of three attack animations "Attack1", "Attack2", "Attack3"
-        m_animator.SetTrigger("Attack" + m_currentAttack);
+                // Reset Attack combo if time since last attack is too large
+                if (m_timeSinceAttack > 1.0f)
+                    m_currentAttack = 1;
+                Invoke("Attack", 0.3f);
+                // Call one of three attack animations "Attack1", "Attack2", "Attack3"
+                m_animator.SetTrigger("Attack" + m_currentAttack);
 
-        // Reset timer
-        m_timeSinceAttack = 0.0f;
+                // Reset timer
+                m_timeSinceAttack = 0.0f;
+            }
+        }
     }
     private void BlinkPozision()
     {
@@ -328,6 +373,7 @@ public class PlayerController : MonoBehaviour {
 
     private IEnumerator ShakeComboText()
     {
+        Debug.Log("shake combo text");
         Vector3 originalPosition = comboTxt.transform.position;
         Vector3 originalPositionStr = comboTxtStr.transform.position;
 
@@ -353,6 +399,7 @@ public class PlayerController : MonoBehaviour {
 
     private IEnumerator RightClickAnim()
     {
+        Debug.Log("RightClickAnim");
         StartCoroutine(ShakeComboText());
         Instantiate(blink, transform.position, Quaternion.identity);
         yield return null;

@@ -8,6 +8,10 @@ TagManager:
   - Attack
   - Enemy
   - Healt
+  - AttackBuff
+  - Shield
+  - SpeedBuff
+  - Enemy2
   layers:
   - Default
   - TransparentFX

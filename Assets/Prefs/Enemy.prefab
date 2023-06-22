@@ -369,6 +369,7 @@ MonoBehaviour:
   attackDistance: 0.8
   approachDistance: 3
   attackCooldown: 3
+  rectTransform: {fileID: 5550279350176454986}
 --- !u!1 &5550279351186365488
 GameObject:
   m_ObjectHideFlags: 0

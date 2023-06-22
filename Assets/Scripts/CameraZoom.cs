@@ -17,15 +17,25 @@ public class CameraZoom : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        IsZooming();
+    }
+    public void ButtonDown()
+    {
+        if(!GetHit.isDeath)
         {
-            isZooming = true;
+            if (!isZooming)
+            {
+                isZooming = true;
+            }
         }
+    }
 
-        if (Input.GetMouseButtonUp(1))
-        {
-            isZooming = false;
-        }
+    public void ButtonUp()
+    {
+        isZooming = false;
+    }
+    void IsZooming()
+    {
         if (isZooming)
         {
             if (mainCamera.orthographicSize > maxZoomSize)
